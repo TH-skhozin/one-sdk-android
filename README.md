@@ -79,7 +79,7 @@ Requires Gradle 5.6.4+
 
     ```gradle
     dependencies {     
-      implementation "com.thunderhead.android:one-sdk:8.1.0"
+      implementation "com.thunderhead.android:one-sdk:{SDK_VERSION}"
     }
     ```
     
@@ -87,7 +87,7 @@ Requires Gradle 5.6.4+
     
     ```gradle
     dependencies {     
-      implementation "com.thunderhead.android:is-sdk:8.1.0"
+      implementation "com.thunderhead.android:is-sdk:{SDK_VERSION}"
     }
     ```
 
@@ -215,7 +215,7 @@ android {
 }
 
 dependencies {     
-  implementation "com.thunderhead.android:one-sdk:8.1.0"
+  implementation "com.thunderhead.android:one-sdk:{SDK_VERSION}"
 }
 
 repositories {
@@ -284,7 +284,7 @@ android {
 }
 
 dependencies {     
-  implementation "com.thunderhead.android:is-sdk:8.1.0"
+  implementation "com.thunderhead.android:is-sdk:{SDK_VERSION}"
 }
 
 repositories {
@@ -968,9 +968,217 @@ One.sendResponseCode(responseCodeRequest).enqueue(null);
 - Sends a `PUT` request to Thunderhead ONE or Salesforce Interaction Studio.
 - When sending Interaction requests programmatically, please ensure the Interaction starts with a `/` and contains only letters, numbers, and/or dashes.
 
-### Retrieve a response for an automatically triggered Interaction request 
+### Retrieve a response for an automatically triggered Interaction request
 
-Retrieve a response for an automatically triggered Interaction request by setting an Interaction callback, as shown below:
+The Thunderhead SDK considers Android Activities and Fragments as Interactions.  When configured correctly the SDK will _automatically_
+send an interaction request to ONE and process the response which may contain points (optimizations, capture, etc). If desired,
+you can be notified of these automatic interactions to take additional action on each interaction request, by using the
+automatic interaction callback api.
+
+**Notes**
+* It is incumbent on you to then process the response in order for the Thunderhead SDK
+to perform optimizations.
+* Assigning a manual/custom interaction to a view should be done _before_ setting
+an automatic interaction callback.
+
+Example: Automatic Activity Interaction
+
+`Kotlin`
+```kotlin
+import com.thunderhead.android.api.process
+import com.thunderhead.android.api.setAutomaticInteractionCallback
+// rest of imports
+
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+    }
+
+    override fun onStart() {
+        setAutomaticInteractionCallback {
+            onError { err ->
+                Log.e(TAG, "SDK Error", err)
+            }
+
+            onFailure { err ->
+                Log.e(TAG, "API Error", err)
+            }
+
+            onSuccess { response ->
+                Log.d(TAG, "Success: ${response.tid}")
+                // Do something with response
+                response.process()
+            }
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        removeAutomaticInteractionCallback()
+    }
+
+    companion object {
+        const val TAG = "MainActivity"
+    }
+}
+```
+
+`Java`
+```java
+public class MainActivity extends AppCompatActivity {
+    private static final String TAG = "MainActivity";
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+    }
+
+    @Override
+    protected void onStart() {
+        One.setAutomaticInteractionCallback(this, new OneCallback() {
+            @Override
+            public void onSuccess(@NotNull OneResponse response) {
+                Log.d(TAG, response.getTid());
+                // Do something with response
+                One.processResponse(response);
+            }
+
+            @Override
+            public void onError(@NotNull OneSDKError error) {
+                Log.e(TAG, "SDK Error", error);
+            }
+
+            @Override
+            public void onFailure(@NotNull OneAPIError error) {
+                Log.e(TAG, "API Error", error);
+            }
+        });
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        One.removeAutomaticInteractionCallback(this);
+    }
+}
+```
+
+Example: Automatic Fragment Interaction
+
+`Kotlin`
+```kotlin
+import com.thunderhead.android.api.process
+import com.thunderhead.android.api.setAutomaticInteractionCallback
+// rest of imports
+
+class MainActivity : FragmentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        if (savedInstanceState == null) {
+            supportFragmentManager.beginTransaction()
+                .add(R.id.fragment_container, TestFragment())
+                .setReorderingAllowed(true)
+                .commit()
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        supportFragmentManager
+            .findFragmentById(R.id.fragment_container)
+            ?.setAutomaticInteractionCallback {
+                onError { err ->
+                    Log.e(TAG, "SDK Error", err)
+                }
+
+                onFailure { err ->
+                    Log.e(TAG, "API Error", err)
+                }
+
+                onSuccess { response ->
+                    Log.d(TAG, "Success: ${response.tid}")
+                    // Do something with response
+                    response.process()
+                }
+            }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        supportFragmentManager
+            .findFragmentById(R.id.fragment_container)
+            ?.removeAutomaticInteractionCallback()
+    }
+
+    class TestFragment : Fragment() {
+        override fun onCreateView(
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
+        ): View? = inflater.inflate(R.layout.fragment_test, container, false)
+    }
+
+    companion object {
+        const val TAG = "MainActivity"
+    }
+}
+```
+
+`Java`
+```java
+public class MainActivity extends FragmentActivity {
+    private static final String TAG = "MainActivity";
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        if(savedInstanceState == null) {
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.add(R.id.fragment_container, new TestFragment());
+            fragmentTransaction.commit();
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart()
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        Fragment fragment = fragmentManager.findFragmentById(R.id.fragment_container);
+        One.setAutomaticInteractionCallback(fragment, new OneCallback() {
+            @Override
+            public void onSuccess(@NotNull OneResponse response) {
+                Log.d(TAG, response.getTid());
+                // Do something with response
+                One.processResponse(response);
+            }
+
+            @Override
+            public void onError(@NotNull OneSDKError error) {
+                Log.e(TAG, "SDK Error", error);
+            }
+
+            @Override
+            public void onFailure(@NotNull OneAPIError error) {
+                Log.e(TAG, "API Error", error);
+            }
+        });
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        Fragment fragment = fragmentManager.findFragmentById(R.id.fragment_container);
+        One.removeAutomaticInteractionCallback(fragment);
+    }
+}
+```
+
+Example: Manually Assigned Interaction
 
 `Kotlin`
 ```kotlin
@@ -978,37 +1186,40 @@ import com.thunderhead.android.api.oneSetAutomaticInteractionCallback
 import com.thunderhead.android.api.interactions.OneInteractionPath
 // rest of imports
 
-oneSetAutomaticInteractionCallback(OneInteractionPath(URI("https://server.com"))) {
+oneSetAutomaticInteractionCallback(OneInteractionPath(URI("/ManualInteraction"))) {
+    onError { err ->
+        Log.e(TAG, "SDK Error", err)
+    }
+
+    onFailure { err ->
+        Log.e(TAG, "API Error", err)
+    }
+
     onSuccess { response ->
-        // perform custom action
+        Log.d(TAG, "Success: ${response.tid}")
+        // Do something with response
         response.process()
-    }
-
-    onError { sdkError ->
-        Log.d(TAG, "SdkError: ${sdkError.errorMessage}")
-    }
-
-    onFailure { apiError ->
-        Log.d(TAG, "ApiError: ${apiError.errorMessage}")
     }
 }
 ```
 
 `Java`
 ```java
-One.setAutomaticInteractionCallback(new OneInteractionPath(URI.create(TestConstants.test_triggered_interaction_1)), new OneCallback() {
+One.setAutomaticInteractionCallback(new OneInteractionPath(URI.create("/ManualInteraction")), new OneCallback() {
     @Override
     public void onFailure(@NotNull OneAPIError error) {
-        Log.e(TAG, "ApiError: " + error.getErrorMessage());
+        Log.e(TAG, "ApiError", error);
     }
 
     @Override
     public void onError(@NotNull OneSDKError error) {
-        Log.e(TAG, "SdkError: " + error.getErrorMessage());
+        Log.e(TAG, "SdkError", error);
     }
 
     @Override
     public void onSuccess(@NotNull OneResponse response) {
+        Log.d(TAG, "Success: ${response.tid}")
+        // Do something with response
         One.processResponse(response);
     }
 });
@@ -1024,17 +1235,18 @@ The response can be passed to the `processResponse` method, as shown above. By c
 import com.thunderhead.android.api.oneRemoveAutomaticInteractionCallback
 import com.thunderhead.android.api.interactions.OneInteractionPath
 
-protected fun onStop() {
+override fun onStop() {
     super.onStop()
-    oneRemoveAutomaticInteractionCallback(OneInteractionPath(URI.create("/interaction")))
+    oneRemoveAutomaticInteractionCallback(OneInteractionPath(URI("/MainActivity")))
 }
 ```
 
 `Java`
 ```java
+@Override
 protected void onStop() {
     super.onStop();
-    One.removeAutomaticInteractionCallback(new OneInteractionPath(URI.create(TestConstants.test_triggered_interaction_1)));
+    One.removeAutomaticInteractionCallback(new OneInteractionPath(URI.create("/MainActivity")));
 }
 ```
     
@@ -1685,3 +1897,4 @@ _For Salesforce Marketing Cloud Interaction Studio questions, please submit a su
 
 ### Thunderhead ONE support
 _The Thunderhead team is available 24/7 to answer any questions you have. Just email onesupport@thunderhead.com or visit our docs page for more detailed installation and usage information._
+
