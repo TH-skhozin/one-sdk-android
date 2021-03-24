@@ -1,31 +1,25 @@
 ![Thunderhead SDK](https://i.imgur.com/gfizURy.png "Thunderhead")
 
-The Thunderhead SDK for Android supports Android 5.0+ (API 21) and Android Gradle Plugin 3.6.x.
+## Resources
 
-**To  _migrate_ from version(s) <= 3.0.0 to version(s) 4.0.0+ of the Thunderhead SDK, please see the [plugin migration guide](https://github.com/thunderheadone/one-android-orchestration-plugin/blob/master/MIGRATION.md)
-for details on updating the required Gradle plugins.**
-
-**To _migrate_ from version(s) < 5.0.0 of the Thunderhead SDK to version(s) 5.0.0+, please see the [Java 8 migration guide](JAVA8-MIGRATION-GUIDE.md) for details
-on updating your app to be Java 8 compatible in order to use the Thunderhead SDK.**
-
-**To _migrate_ from version(s) < 6.0.0 of the Thunderhead SDK to version(s) 6.0.0+, please see the [Version 6 migration guide](MIGRATION-VERSION-6.md) for details
-on updating your existing SDK configuration.**
+* [Migration Guides](https://github.com/thunderheadone/one-sdk-android/tree/master/migration-guides)
+* [API docs](https://thunderheadone.github.io/one-sdk-android/)
 
 ## Table of Contents
 
+* [Requirements](#requirements)
 * [Installation](#installation)
-    * [Manual installation](#manual-installation)
-* [Use the codeless Thunderhead SDK for Android](#use-the-codeless-thunderhead-sdk-for-android)
-     * [Thunderhead Application Manifest file permissions](#thunderhead-application-manifest-file-permissions)
-     * [Configure and reconfigure the SDK](#configure-and-reconfigure-the-sdk)
+* [Configure the codeless Thunderhead SDK for Android](#configure-the-codeless-thunderhead-sdk-for-android)
+    * [Set up the SDK in User mode for Play Store builds](#set-up-the-sdk-in-user-mode-for-play-store-builds)
+    * [Set up the SDK in Admin mode for internal distribution](#set-up-the-sdk-in-admin-mode-for-internal-distribution)
+    * [Further codeless integration considerations](#further-codeless-integration-considerations)
+        * [Sending codeless Interactions based on the list of Interactions created under a Touchpoint](#sending-codeless-interactions-based-on-the-list-of-interactions-created-under-a-touchpoint)
+        * [Thunderhead Application Manifest file permissions](#thunderhead-application-manifest-file-permissions)
+        * [Configure and reconfigure the SDK](#configure-and-reconfigure-the-sdk)
         * [SDK initialization not required](#sdk-initialization-not-required)
-        * [Set up the SDK in User mode](#set-up-the-sdk-in-user-mode)
-        * [Set up the SDK in Admin mode](#set-up-the-sdk-in-admin-mode)
-        * [Sending codeless Interactions based on the list of Interactions created under a Touchpoint](#sending-codeless-Interactions-based-on-the-list-of-Interactions-created-under-a-touchpoint)
-* [Considerations](#considerations)
-     * [Additional configuration required for apps configured with push messaging](#additional-configuration-required-for-apps-configured-with-push-messaging)
 * [Additional features](#additional-features)
     * [Opt an end-user out of tracking](#opt-an-end-user-out-of-tracking)
+    * [Opt an end user out of city country level tracking](#opt-an-end-user-out-of-city-country-level-tracking)
     * [Exclude an Interaction](#exclude-an-interaction)
     * [Disable automatic Interaction detection](#disable-automatic-interaction-detection)
     * [Programmatic Interactions and Properties API](#programmatic-interactions-and-properties-api)
@@ -37,6 +31,10 @@ on updating your existing SDK configuration.**
             * [Send Properties to a base Touchpoint](#send-properties-to-a-base-touchpoint)
         * [Send a response code](#send-a-response-code)
     * [Retrieve a response for an automatically triggered Interaction request](#retrieve-a-response-for-an-automatically-triggered-interaction-request)
+        * [Example: Retrieve a response for an automatic Activity Interaction](#example-retrieve-a-response-for-an-automatic-activity-interaction)
+        * [Example: Retrieve a response for an automatic Fragment Interaction](#example-retrieve-a-response-for-an-automatic-fragment-interaction)
+        * [Example: Retrieve a response for a manually assigned Interaction](#example-retrieve-a-response-for-a-manually-assigned-interaction)
+        * [Optional response processing](#optional-response-processing)
     * [Assign an Interaction to a View](#assign-an-interaction-to-a-view)
     * [Ability to whitelist identity transfer links](#ability-to-whitelist-identity-transfer-links)
     * [Ability to blacklist identity transfer links](#ability-to-blacklist-identity-transfer-links)
@@ -46,16 +44,13 @@ on updating your existing SDK configuration.**
         * [Create an `android.net.Uri` or `java.net.URI` with a `one-tid` parameter to facilitate identity transfer](#create-an-androidneturi-or-javaneturi-with-a-one-tid-parameter-to-facilitate-identity-transfer)
     * [Disable automatic outbound link tracking](#disable-automatic-outbound-link-tracking)
         * [Programmatically trigger an outbound link tracking Interaction call](#programmatically-trigger-an-outbound-link-tracking-interaction-call)
-    * [Enable push notifications](#enable-push-notifications)
-        * [Minimum Gradle configuration](#minimum-gradle-configuration)
-        * [Enable codeless push notification support programmatically](#enable-codeless-push-notification-support-programmatically)
-           * [Configure push notifications with multiple push message SDKs](#configure-push-notifications-with-multiple-push-message-sdks)
-           * [Set a non adaptive fallback](#set-a-non-adaptive-fallback)
-    * [Get a push token](#get-a-push-token)
-    * [Send a push token](#send-a-push-token)
      * [Send a location object](#send-a-location-object)
      * [Get Tid](#get-tid)
-     * [Access debug information](#access-debug-information)
+     * [Configuring Logging](#configuring-logging)
+        * [Turn all logs on](#turn-all-logs-on)
+        * [Turn specific logs on](#turn-specific-logs-on)
+        * [Turn logs for the Thunderhead SDK initialization process on](#turn-logs-for-the-thunderhead-sdk-initialization-process-on)
+        * [Turn all logs off](#turn-all-logs-off)
      * [Identify the SDK version](#identify-the-sdk-version)
      * [Clear the user profile](#clear-the-user-profile)
 * [Further integration details](#further-integration-details)
@@ -65,94 +60,98 @@ on updating your existing SDK configuration.**
     * [Salesforce Interaction Studio support](#salesforce-interaction-studio-support)
     * [Thunderhead ONE support](#thunderhead-one-support)
 
+## Requirements
+
++ [Android Gradle Plugin](https://developer.android.com/studio/releases/gradle-plugin) 3.6.x
++ Android 5.0+ (API 21) and above
++ [Gradle](https://gradle.org/releases/) 5.6.4
+
 ## Installation
-
-### Manual installation
-
-Requires Gradle 5.6.4+
 
 1. Open your existing Android application in Android Studio.
 2. Include the Thunderhead SDK as a dependency in your project:
-+ Navigate to your **app-level** build.gradle.
-+ Add the following, under the dependencies section:
-    + For **Thunderhead ONE** integrations:
+    Navigate to your **app-level** build.gradle.
+    
+    Add the following, under the dependencies section:
+    
+    For **Thunderhead ONE** integrations:
 
     ```gradle
     dependencies {     
-      implementation "com.thunderhead.android:one-sdk:8.1.0"
+      implementation "com.thunderhead.android:one-sdk:{SDK_VERSION}"
     }
     ```
     
-    + For **Salesforce Interaction Studio** integrations:
+    For **Salesforce Interaction Studio** integrations:
     
     ```gradle
     dependencies {     
-      implementation "com.thunderhead.android:is-sdk:8.1.0"
+      implementation "com.thunderhead.android:is-sdk:{SDK_VERSION}"
     }
     ```
 
 3. Add the Thunderhead SDK configuration within the same **app-level** `build.gradle` file. 
 
-+ Add `RenderScript` support under the `defaultConfig` section:
+    Add `RenderScript` support under the `defaultConfig` section:
 
-```gradle
-defaultConfig {
-   renderscriptTargetApi 22
-   renderscriptSupportModeEnabled true
-}
-```
+    ```gradle
+    defaultConfig {
+        renderscriptTargetApi 22
+        renderscriptSupportModeEnabled true
+    }
+    ```
 
-+ Add the following, under the repositories section:
+    Add the following, under the repositories section:
 
-``` gradle 
-repositories {
-  maven {
-   url 'https://thunderhead.mycloudrepo.io/public/repositories/one-sdk-android'
-  }
-}
-```
-
-+ Append the following configuration, for both **Thunderhead ONE** and **Salesforce Interaction Studio** integrations:
-
-``` gradle 
-apply plugin: 'com.thunderhead.android.orchestration-plugin'
-```
-  
-4. Add Java 8 Support
-
-+ Add the following, under the `android` section
-
-```groovy
-compileOptions {
-    sourceCompatibility 1.8
-    targetCompatibility 1.8
-}
-```
-
-5. Update your `build.gradle` file to add codeless identity transfer support.
-
-+ Navigate to the **top-level** `build.gradle` file and add both a maven repository url and class path dependencies as shown below:
-
-``` gradle 
-buildscript {
+    ``` gradle 
     repositories {
-        google()
-        jcenter()
         maven {
-            name 'ThunderheadSpringMilestone'
-            url = 'https://repo.spring.io/milestone'
-        }
-        maven {
-            name 'Thunderhead'
             url 'https://thunderhead.mycloudrepo.io/public/repositories/one-sdk-android'
         }
     }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:3.4.2'
-        classpath 'com.thunderhead.android:orchestration-plugin:2.0.0'
+    ```
+
+    Append the following configuration, for both **Thunderhead ONE** and **Salesforce Interaction Studio** integrations:
+
+    ``` gradle 
+    apply plugin: 'com.thunderhead.android.orchestration-plugin'
+    ```
+  
+4. Add Java 8 Support
+
+    Add the following, under the `android` section
+
+    ```groovy
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
     }
-}
-```
+    ```
+
+5. Update your `build.gradle` file to add codeless identity transfer support.
+
+    Navigate to the **top-level** `build.gradle` file and add both a maven repository url and class path dependencies as shown below:
+
+    ``` gradle 
+    buildscript {
+        repositories {
+            google()
+            jcenter()
+            maven {
+                name 'ThunderheadSpringMilestone'
+                url = 'https://repo.spring.io/milestone'
+            }
+            maven {
+                name 'Thunderhead'
+                url 'https://thunderhead.mycloudrepo.io/public/repositories/one-sdk-android'
+            }
+        }
+        dependencies {
+            classpath 'com.android.tools.build:gradle:3.4.2'
+            classpath 'com.thunderhead.android:orchestration-plugin:4.0.0'
+        }
+    }
+    ```
 
 ####  `build.gradle` examples
 
@@ -176,7 +175,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.4.2'
-        classpath 'com.thunderhead.android:orchestration-plugin:2.0.0'
+        classpath 'com.thunderhead.android:orchestration-plugin:4.0.0'
     }
 }
 
@@ -215,7 +214,7 @@ android {
 }
 
 dependencies {     
-  implementation "com.thunderhead.android:one-sdk:8.1.0"
+  implementation "com.thunderhead.android:one-sdk:{SDK_VERSION}"
 }
 
 repositories {
@@ -246,7 +245,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.4.2'
-        classpath 'com.thunderhead.android:orchestration-plugin:2.0.0'
+        classpath 'com.thunderhead.android:orchestration-plugin:4.0.0'
     }
 }
 
@@ -284,7 +283,7 @@ android {
 }
 
 dependencies {     
-  implementation "com.thunderhead.android:is-sdk:8.1.0"
+  implementation "com.thunderhead.android:is-sdk:{SDK_VERSION}"
 }
 
 repositories {
@@ -297,42 +296,13 @@ repositories {
 
 For further documentation on the `orchestration-plugin` please see the [Orchestration Plugin Readme](https://github.com/thunderheadone/one-android-orchestration-plugin/blob/master/README.md).
 
-## Use the codeless Thunderhead SDK for Android
+## Configure the codeless Thunderhead SDK for Android
 
-Enable your app to automatically recognize **Interactions** by executing the following steps.
+Enable your app to automatically recognize **Interactions** in your app, by executing the following steps:
 
 *Developer note:* Android Studio `Instant Run` is not currently supported and must be disabled.
 
-### Thunderhead Application Manifest file permissions
-
-The following permissions are included in the Thunderhead SDK's `AndroidManifest.xml` and will be merged with your applications AndroidManifest.xml:
-```xml
-<uses-permission android:name="android.permission.INTERNET" />
-<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-<uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-```
-*Note:* 
-- The `SYSTEM_ALERT_WINDOW` permission is needed only for Admin mode builds. Add this as a flavor-specific permission  in your setup to avoid having to show it as a permission change to your Play Store users.
-- You can remove this permission in User mode builds by adding the following to your manifest: 
-```xml 
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" tools:node="remove" />
-```
-
-### Configure and reconfigure the SDK
-
-You can configure and reconfigure the SDK as many times as necessary. 
-* The SDK does not support partial, or piecemeal, configuration. You must provide all parameters, either all valid or invalid (`empty string` or `null`).  
-* When configured with invalid parameters, the SDK is set in an *unconfigured* state.
-
-See [here](https://github.com/thunderheadone/one-sdk-android/tree/master/examples/dynamic-configuration-example) for an example app that demonstrates dynamic configuration.
-
-#### SDK initialization not required
-
-The Thunderhead SDK is automatically initialized in an *unconfigured* state.
-* When *unconfigured*, the SDK queues end-user data locally and uploads that data to the server once the SDK is configured with valid parameters.
-* You can disable this functionality, at any time, by setting the `oneOptOutConfiguration` to `true`. See more about opt out [here](#opt-an-end-user-out-of-tracking).
-
-#### Set up the SDK in User mode
+### Set up the SDK in User mode for Play Store builds
 
 To start capturing insights and configuring orchestrations in User mode, you must first configure the Thunderhead SDK with your Thunderhead API parameters. 
 You can find your Thunderhead API parameters on the _API Credentials_ page in Thunderhead ONE or Salesforce Interaction Studio.
@@ -405,17 +375,17 @@ public class YourApplication extends Application {
 }
 ```
 
-*Note:* 
-- Set up the User mode SDK build as part of the release build you plan to publish to the Play Store.
-- Dynamic configuration of both Admin and User mode is supported.
+### Set up the SDK in Admin mode for internal distribution
 
-#### Set up the SDK in Admin mode
-
-To use the SDK in Admin mode, change the `OneModes` parameter to `ADMIN_MODE`.
+To use the SDK in Admin mode, change the `OneModes` parameter to `OneModes.ADMIN_MODE`.
 
 *Note:* 
 - If you are running in Admin mode on Android 6.0+, you must enable the “draw over other apps” permission through your OS settings. 
 - Dynamic configuration of both Admin and User mode is supported.
+
+**You have now successfully integrated the codeless Thunderhead SDK for Android.**
+
+### Further codeless integration considerations
 
 #### Sending codeless Interactions based on the list of Interactions created under a Touchpoint
 
@@ -426,101 +396,34 @@ In order to reduce the number of unnecessary Interaction requests sent automatic
 - For a codeless Interaction to be sent by the SDK this Interaction needs to contain at least one Activity Capture Point, Attribute Capture Point, and/or Optimization Point.
 - If you are running the SDK in [User mode](#set-up-the-sdk-in-user-mode), you need to ensure that all Interactions and related points have been fully published, before the SDK will trigger a request.
 
-**You have now successfully integrated the codeless Thunderhead SDK for Android.**
+#### Thunderhead Application Manifest file permissions
 
-## Considerations
-
-### Additional configuration required for apps configured with push messaging
-
-When the Thunderhead SDK is the *only* push message provider in your application and you enable codeless push notification support, the SDK automatically gets the push token and handles the receiving of push notifications on behalf of your app, and therefore the below additional configuration instructions would not be needed.
-
-When the Thunderhead SDK is integrated into an app configured with Firebase Cloud Messaging (FCM), or utilizes a third-party library using FCM, additional configuration is required to ensure push messaging continues to work for all SDKs using FCM.
-*Note:*
-- This is still required even if Thunderhead push notifications are not enabled.
-
-You must forward the `onNewToken` and `onMessageReceived` callbacks to *all* SDK message APIs from the service that extends `FirebaseMessagingService`.
-
-If using the Thunderhead SDK for push messaging, forward the callbacks as shown below:
-
-```kotlin
-// Call when a new FCM token is retrieved:
-One.setMessagingToken(newToken);
-
-// Call when a new message is received from Firebase:
-One.processMessage(message);
-```
-
-An example of a service extending `FirebaseMessagingService` that calls the SDK messaging APIs:
-
-`Kotlin`
-```kotlin
-class FirebaseService : FirebaseMessagingService() {
-
-    override fun onMessageReceived(remoteMessage: RemoteMessage) {
-        super.onMessageReceived(remoteMessage)
-        try {
-            One.processMessage(remoteMessage)
-            // Call other Push Message SDKs.
-        } catch (e: Exception) {
-            Log.e(TAG, e.message)
-        }
-    }
-
-    override fun onNewToken(newToken: String) {
-        super.onNewToken(newToken)
-        try {
-            One.setMessagingToken(newToken)
-            // Call other Push Message SDKs.
-        } catch (e: Exception) {
-            Log.e(TAG, e.message)
-        }
-    }
-    companion object {
-        private const val TAG = "FirebaseService"
-    }
-}
-```
-
-`Java`
-```java
-public final class FirebaseService extends FirebaseMessagingService {
-    private static final String TAG = "FirebaseService";
-
-    @Override
-    public void onMessageReceived(final RemoteMessage remoteMessage) {
-        super.onMessageReceived(remoteMessage);
-        try {
-            One.processMessage(remoteMessage);
-            // Call other Push Message SDKs.
-        } catch (Exception e) {
-            Log.e(TAG, e.getMessage());
-        }
-    }
-
-    @Override
-    public void onNewToken(final String newToken) {
-        super.onNewToken(newToken);
-        try {
-            One.setMessagingToken(newToken);
-            // Call other Push Message SDKs.
-        } catch (Exception e) {
-            Log.e(TAG, e.getMessage());
-        }
-    }
-}
-```
-
-Do not forget to register the service in the manifest, if required:
-
+The following permissions are included in the Thunderhead SDK's `AndroidManifest.xml` and will be merged with your applications AndroidManifest.xml:
 ```xml
-<!-- The priority should be set to a high value in order to ensure this service receives the intent vs the other push provider SDKs -->
- <service
-    android:name="com.example.FirebaseService">
-        <intent-filter android:priority="100">
-            <action android:name="com.google.firebase.MESSAGING_EVENT" />
-        </intent-filter>
-</service>
+<uses-permission android:name="android.permission.INTERNET" />
+<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+<uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 ```
+*Note:* 
+- The `SYSTEM_ALERT_WINDOW` permission is needed only for Admin mode builds. Add this as a flavor-specific permission  in your setup to avoid having to show it as a permission change to your Play Store users.
+- You can remove this permission in User mode builds by adding the following to your manifest: 
+```xml 
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" tools:node="remove" />
+```
+
+#### Configure and reconfigure the SDK
+
+You can configure and reconfigure the SDK as many times as necessary. 
+* The SDK does not support partial, or piecemeal, configuration. You must provide all parameters, either all valid or invalid (`empty string` or `null`).  
+* When configured with invalid parameters, the SDK is set in an *unconfigured* state.
+
+See [here](https://github.com/thunderheadone/one-sdk-android/tree/master/examples/dynamic-configuration-example) for an example app that demonstrates dynamic configuration.
+
+#### SDK initialization not required
+
+The Thunderhead SDK is automatically initialized in an *unconfigured* state.
+* When *unconfigured*, the SDK queues end-user data locally and uploads that data to the server once the SDK is configured with valid parameters.
+* You can disable this functionality, at any time, by setting the `oneOptOutConfiguration` to `true`. See more about opt out [here](#opt-an-end-user-out-of-tracking).
 
 ## Additional features
 
@@ -556,6 +459,74 @@ One.setOptOutConfiguration(optOutConfiguration);
 - You can opt a user back in, at any point, by setting the `optOut` parameter to `false` using the same method. 
 - For instructions on completely removing a user's data from Thunderhead ONE or Salesforce Interaction Studio, see our [API Documentation](https://thunderheadone.github.io/one-api/#operation/delete).
 
+### Opt an end user out of city country level tracking
+
+Use this option to opt an end-user out or in of all city/country level tracking.
+
+Examples of how to opt in to city/country level tracking
+
+`Kotlin`
+```kotlin
+import com.thunderhead.android.api.oneConfigureOptOut
+import com.thunderhead.android.api.optout.OptInOptions
+
+val options = EnumSet.noneOf(OptInOptions::class.java)
+options.add(OptInOptions.CITY_COUNTRY_DETECTION)
+oneConfigureOptOut {
+    optOut = false
+    optInOptions = options
+}
+```
+
+`Java`
+```java
+import com.thunderhead.One;
+import com.thunderhead.android.api.optout.OneOptOutConfiguration;
+import com.thunderhead.android.api.optout.OptInOptions;
+
+Set<OptInOptions> options = EnumSet.noneOf(OptInOptions.class);
+options.add(OptInOptions.CITY_COUNTRY_DETECTION);
+final OneOptOutConfiguration optOutConfiguration = new OneOptOutConfiguration.Builder()
+            .optOut(false)
+            .optInOptions(options)
+            .build();
+
+One.setOptOutConfiguration(optOutConfiguration);
+```
+
+Examples of how to opt out of city/country level tracking
+
+`Kotlin`
+```kotlin
+import com.thunderhead.android.api.oneConfigureOptOut
+import com.thunderhead.android.api.optout.OptInOptions
+
+val options = EnumSet.noneOf(OptInOptions::class.java)
+oneConfigureOptOut {
+    optOut = false
+    optInOptions = options
+}
+```
+
+`Java`
+```java
+import com.thunderhead.One;
+import com.thunderhead.android.api.optout.OneOptOutConfiguration;
+import com.thunderhead.android.api.optout.OptInOptions;
+
+Set<OptInOptions> options = EnumSet.noneOf(OptInOptions.class);
+final OneOptOutConfiguration optOutConfiguration = new OneOptOutConfiguration.Builder()
+            .optOut(false)
+            .optInOptions(options)
+            .build();
+
+One.setOptOutConfiguration(optOutConfiguration);
+```
+
+*Note:*
+- By default a user is opted in and would need to be specifically opted out using the method mentioned above, depending on your specific privacy requirements.
+- When a user is opted out, all opt in options are ignored.
+
 ### Exclude an Interaction
 
 Exclude a specific view from being automatically recognized as an Interaction, using the `excludeAutomaticInteraction` Kotlin extension function or `One.excludeAutomaticInteraction` Java method in an Activity's `onCreate` method or a Fragment's `onCreateView`, as shown below. 
@@ -588,14 +559,20 @@ public View onCreateView(LayoutInflater inflater, ViewGroup container,
 
 ### Disable automatic Interaction detection
 
-You can disable automatic Interaction detection by calling the `oneConfigureCodelessInteractionTracking` Kotlin top-level function or the `One.setCodelessInteractionTrackingConfiguration` Java method with the appropriate configuration, as shown below:
+You can disable automatic Interaction detection by calling the `oneConfigureCodelessInteractionTracking` Kotlin top-level function or 
+the `One.setCodelessInteractionTrackingConfiguration` Java method with the appropriate configuration, as shown below:
 
 `Kotlin`
 ```kotlin
 import com.thunderhead.android.api.oneConfigureCodelessInteractionTracking
 
 oneConfigureCodelessInteractionTracking {
-    disableCodelessInteractionTracking = true
+    // disables Fragment/Activity Interaction Tracking
+    disableCodelessInteractionTracking = true 
+    // disables WebView URL Interaction Tracking
+    disableWebViewInteractionTracking = true
+    // disables Outbound Link Tracking
+    disableOutboundLinkTracking = true
 }
 ```
 
@@ -606,7 +583,12 @@ import com.thunderhead.android.api.codeless.OneCodelessInteractionTrackingConfig
 
 final OneCodelessInteractionTrackingConfiguration codelessInteractionTrackingConfiguration =
     new OneCodelessInteractionTrackingConfiguration.Builder()
+        // disables Fragment/Activity Interaction Tracking
         .disableCodelessInteractionTracking(true)
+        // disables WebView URL Interaction Tracking
+        .disableWebViewInteractionTracking(true)
+        // disables Outbound Link Tracking
+        .disableOutboundLinkTracking(true)
         .build();
 One.setCodelessInteractionTrackingConfiguration(codelessInteractionTrackingConfiguration);
 ```
@@ -968,76 +950,303 @@ One.sendResponseCode(responseCodeRequest).enqueue(null);
 - Sends a `PUT` request to Thunderhead ONE or Salesforce Interaction Studio.
 - When sending Interaction requests programmatically, please ensure the Interaction starts with a `/` and contains only letters, numbers, and/or dashes.
 
-### Retrieve a response for an automatically triggered Interaction request 
+### Retrieve a response for an automatically triggered Interaction request
 
-Retrieve a response for an automatically triggered Interaction request by setting an Interaction callback, as shown below:
+The Thunderhead SDK considers Android Activities and Fragments as Interactions. When configured correctly the SDK will _automatically_
+send an Interaction request to ONE and process the response which may contain points (optimizations, capture, etc). If desired,
+you can be notified of these automatic Interactions to take additional action on each Interaction request, by using the
+automatic Interaction callback API.
+
+**Notes**
+* It is incumbent on you to then process the response in order for the Thunderhead SDK to perform automatic capture and optimization.
+* Assigning a manual/custom Interaction to a view should be done _before_ setting an automatic Interaction callback.
+* If you set a callback for an automatically triggered Interaction, you are advised to remove that callback as soon as it is no longer needed under your Activity's `onStop` method.
+
+#### Example: Retrieve a response for an automatic Activity Interaction
+
+`Kotlin`
+```kotlin
+import com.thunderhead.android.api.process
+import com.thunderhead.android.api.setAutomaticInteractionCallback
+import com.thunderhead.android.api.removeAutomaticInteractionCallback
+// rest of imports
+
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        setAutomaticInteractionCallback {
+            onError { error ->
+                Log.e(TAG, "SDK Error", error)
+            }
+
+            onFailure { error ->
+                Log.e(TAG, "API Error", error)
+            }
+
+            onSuccess { response ->
+                Log.d(TAG, "Success: ${response.tid}")
+                // Do something with response
+                response.process()
+            }
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        removeAutomaticInteractionCallback()
+    }
+
+    companion object {
+        const val TAG = "MainActivity"
+    }
+}
+```
+
+`Java`
+```java
+import com.thunderhead.One;
+import com.thunderhead.android.api.interactions.OneCallback;
+import com.thunderhead.android.api.responsetypes.OneAPIError;
+import com.thunderhead.android.api.responsetypes.OneResponse;
+import com.thunderhead.android.api.responsetypes.OneSDKError;
+// rest of imports
+
+public class MainActivity extends AppCompatActivity {
+    private static final String TAG = "MainActivity";
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        One.setAutomaticInteractionCallback(this, new OneCallback() {
+            @Override
+            public void onError(@NotNull OneSDKError error) {
+                Log.e(TAG, "SDK Error", error);
+            }
+
+            @Override
+            public void onFailure(@NotNull OneAPIError error) {
+                Log.e(TAG, "API Error", error);
+            }
+
+            @Override
+            public void onSuccess(@NotNull OneResponse response) {
+                Log.d(TAG, response.getTid());
+                // Do something with response
+                One.processResponse(response);
+            }
+        });
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        One.removeAutomaticInteractionCallback(this);
+    }
+}
+```
+
+#### Example: Retrieve a response for an automatic Fragment Interaction
+
+`Kotlin`
+```kotlin
+import com.thunderhead.android.api.process
+import com.thunderhead.android.api.setAutomaticInteractionCallback
+import com.thunderhead.android.api.removeAutomaticInteractionCallback
+// rest of imports
+
+class MainActivity : FragmentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        if (savedInstanceState == null) {
+            supportFragmentManager.beginTransaction()
+                .add(R.id.fragment_container, TestFragment())
+                .setReorderingAllowed(true)
+                .commit()
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        supportFragmentManager
+            .findFragmentById(R.id.fragment_container)
+            ?.setAutomaticInteractionCallback {
+                onError { error ->
+                    Log.e(TAG, "SDK Error", error)
+                }
+
+                onFailure { error ->
+                    Log.e(TAG, "API Error", error)
+                }
+
+                onSuccess { response ->
+                    Log.d(TAG, "Success: ${response.tid}")
+                    // Do something with response
+                    response.process()
+                }
+            }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        supportFragmentManager
+            .findFragmentById(R.id.fragment_container)
+            ?.removeAutomaticInteractionCallback()
+    }
+
+    class TestFragment : Fragment() {
+        override fun onCreateView(
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
+        ): View? = inflater.inflate(R.layout.fragment_test, container, false)
+    }
+
+    companion object {
+        const val TAG = "MainActivity"
+    }
+}
+```
+
+`Java`
+```java
+import com.thunderhead.One;
+import com.thunderhead.android.api.interactions.OneCallback;
+import com.thunderhead.android.api.responsetypes.OneAPIError;
+import com.thunderhead.android.api.responsetypes.OneResponse;
+import com.thunderhead.android.api.responsetypes.OneSDKError;
+// rest of imports
+
+public class MainActivity extends FragmentActivity {
+    private static final String TAG = "MainActivity";
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        if(savedInstanceState == null) {
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.add(R.id.fragment_container, new TestFragment());
+            fragmentTransaction.commit();
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        Fragment fragment = fragmentManager.findFragmentById(R.id.fragment_container);
+        One.setAutomaticInteractionCallback(fragment, new OneCallback() {
+            @Override
+
+            @Override
+            public void onError(@NotNull OneSDKError error) {
+                Log.e(TAG, "SDK Error", error);
+            }
+
+            @Override
+            public void onFailure(@NotNull OneAPIError error) {
+                Log.e(TAG, "API Error", error);
+            }
+
+            public void onSuccess(@NotNull OneResponse response) {
+                Log.d(TAG, response.getTid());
+                // Do something with response
+                One.processResponse(response);
+            }
+        });
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        Fragment fragment = fragmentManager.findFragmentById(R.id.fragment_container);
+        One.removeAutomaticInteractionCallback(fragment);
+    }
+}
+```
+
+#### Example: Retrieve a response for a manually assigned Interaction
 
 `Kotlin`
 ```kotlin
 import com.thunderhead.android.api.oneSetAutomaticInteractionCallback
 import com.thunderhead.android.api.interactions.OneInteractionPath
+import com.thunderhead.android.api.oneRemoveAutomaticInteractionCallback
+import com.thunderhead.android.api.process
 // rest of imports
 
-oneSetAutomaticInteractionCallback(OneInteractionPath(URI("https://server.com"))) {
+oneSetAutomaticInteractionCallback(OneInteractionPath(URI("/ManualInteraction"))) {
+    onError { error ->
+        Log.e(TAG, "SDK Error", error)
+    }
+
+    onFailure { error ->
+        Log.e(TAG, "API Error", error)
+    }
+
     onSuccess { response ->
-        // perform custom action
+        Log.d(TAG, "Success: ${response.tid}")
+        // Do something with response
         response.process()
     }
-
-    onError { sdkError ->
-        Log.d(TAG, "SdkError: ${sdkError.errorMessage}")
-    }
-
-    onFailure { apiError ->
-        Log.d(TAG, "ApiError: ${apiError.errorMessage}")
-    }
 }
+
+  override fun onStop() {
+      super.onStop()
+      oneRemoveAutomaticInteractionCallback(OneInteractionPath(URI("/ManualInteraction")))
 ```
 
 `Java`
 ```java
-One.setAutomaticInteractionCallback(new OneInteractionPath(URI.create(TestConstants.test_triggered_interaction_1)), new OneCallback() {
+import com.thunderhead.One;
+import com.thunderhead.android.api.interactions.OneInteractionPath;
+import com.thunderhead.android.api.responsetypes.OneAPIError;
+import com.thunderhead.android.api.responsetypes.OneResponse;
+import com.thunderhead.android.api.responsetypes.OneSDKError;
+// rest of imports
+
+One.setAutomaticInteractionCallback(new OneInteractionPath(URI.create("/ManualInteraction")), new OneCallback() {
     @Override
     public void onFailure(@NotNull OneAPIError error) {
-        Log.e(TAG, "ApiError: " + error.getErrorMessage());
+        Log.e(TAG, "ApiError", error);
     }
 
     @Override
     public void onError(@NotNull OneSDKError error) {
-        Log.e(TAG, "SdkError: " + error.getErrorMessage());
+        Log.e(TAG, "SdkError", error);
     }
 
     @Override
     public void onSuccess(@NotNull OneResponse response) {
+        Log.d(TAG, "Success: ${response.tid}");
+        // Do something with response
         One.processResponse(response);
     }
 });
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        One.removeAutomaticInteractionCallback(new OneInteractionPath(URI.create("/ManualInteraction")));
+    }
 ```
+#### Optional response processing 
 
-The response can be passed to the `processResponse` method, as shown above. By calling this method the response is returned to the SDK to process, attaching any activity capture, attribute capture, or optimize instructions to the Interaction.
+The response can be passed to the `processResponse` method, as shown above. By calling this method the response is returned to the SDK to process, attaching any captures, trackers, and/or optimizations to the Interaction.
 
-*Note:* 
-- If you set a callback for an automatically triggered Interaction, you are advised to remove that callback as soon as it is no longer needed under your activity or fragment’s `onStop` method.
-
-`Kotlin`
-```kotlin   
-import com.thunderhead.android.api.oneRemoveAutomaticInteractionCallback
-import com.thunderhead.android.api.interactions.OneInteractionPath
-
-protected fun onStop() {
-    super.onStop()
-    oneRemoveAutomaticInteractionCallback(OneInteractionPath(URI.create("/interaction")))
-}
-```
-
-`Java`
-```java
-protected void onStop() {
-    super.onStop();
-    One.removeAutomaticInteractionCallback(new OneInteractionPath(URI.create(TestConstants.test_triggered_interaction_1)));
-}
-```
-    
 ### Assign an Interaction to a View
 
 Explicitly define a view as an Interaction by calling the `assignInteractionPath` Kotlin extension function
@@ -1423,7 +1632,6 @@ Uri.parse("https://www.yourfullurl.com/").sendInteractionForOutboundLink()
 URL("https://www.yourfullurl.com/").sendInteractionForOutboundLink()
 ```
 
-
 `Java`
 ```java
 // URL example
@@ -1446,126 +1654,6 @@ Pass the `URL` or `Uri`, to send an Interaction request to `/one-click` using th
 *Note:* 
 - Sends a `POST` request to Thunderhead ONE or Salesforce Interaction Studio.
 - Set up the `/one-click` Interaction request in Thunderhead ONE or Salesforce Interaction Studio, to capture the appropriate attributes and activity.
-
-### Enable push notifications
-
-To receive push notifications from Thunderhead ONE or Salesforce Interaction Studio, configure Firebase Cloud Messaging (FCM) by following the FCM setup instructions. At a minimum the app must be configured in Firebase and the `google-services.json` needs to be in the root of the app project.
-
-**Important:** For apps configured with Firebase Cloud Messaging (FCM), or utilizes a third-party library using FCM, additional configuration is required.  See more [here](#additional-configuration-required-for-apps-configured-with-push-messaging).
-
-#### Minimum Gradle configuration 
-
-To use the codeless push notifications functionality without using FCM directly, you must at least have the `google-services` plugin applied to your app build.gradle. 
-
-1. Add the Google Services Plugin to your classpath in the top-level build.gradle, located in the root project directory, as shown below:
-
-```gradle
-buildscript {
-    repositories {
-        google()
-        jcenter()
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:3.4.2'
-        // for cloud messaging support
-        classpath 'com.google.gms:google-services:4.2.0'
-    }
-}
-```
-
-2.  Apply the Google Messaging Service plugin to the app-level build.gradle, as shown below:
-
-```gradle
-// place this at the bottom of your app build.gradle
-apply plugin: 'com.google.gms.google-services'
-```
-    
-- The `Warning: The app gradle file must have a dependency on com.google.firebase:firebase-core for Firebase services to work as intended.` can safely be ignored as this is not required for push notification support.
-    
-#### Enable codeless push notification support programmatically
-
-For Firebase Cloud Messaging, enable push notifications as shown below:
-
-`Kotlin`
-```kotlin
-import com.thunderhead.android.api.oneConfigureMessaging
-
-oneConfigureMessaging {
-    enabled = true
-}
-```
-  
-`Java`
-```java
-import com.thunderhead.One;
-import com.thunderhead.android.api.messaging.OneMessagingConfiguration;
-
-final OneMessagingConfiguration oneMessagingConfiguration = new OneMessagingConfiguration.Builder()
-    .enabled(true)
-    .build();
-
-One.setMessagingConfiguration(oneMessagingConfiguration);
-```
-
-*Note:* 
-- When the Thunderhead SDK is the only push message provider in your application and you enable codeless push notification support, the SDK automatically gets the push token and handles the receiving of push notifications on behalf of your app.
-
-##### Set a non adaptive fallback
-
-Android (O)reo, API 26, shipped with a platform bug relating to Adaptive Icons and Notifications. The bug can be seen [here](https://issuetracker.google.com/issues/68716460).
-The issue was resolved in API 27. It was not, however, back ported to the original Oreo API 26 platform.
-
-The Thunderhead SDK will optimize your user's App experience by sending Push Notifications with _your_ application's icon when appropriate. In order to avoid the infinite crash loop that the above Android bug causes, the Thunderhead SDK will not show the message if a fallback *NON ADAPTIVE* icon is not set at initialization time on API 26 devices.
-Changing your application's icon to a non adaptive icon is not required and the fall back is **only required for API 26**.
-
-The Thunderhead SDK will warn you at init if the icon has not been set by logging the `14019` error. For more information, see the [Troubleshooting guide](TROUBLESHOOTING-GUIDE.md)
-
-Here is an example of setting the fallback for API 26 devices using the built in Android "Star On" non adaptive drawable.  *Important: The icon set must not be adaptive!*
-
-`Kotlin`
-```kotlin
-import com.thunderhead.android.api.oneConfigureMessaging
-
-oneConfigureMessaging {
-    enabled = true
-    nonAdaptiveSmallIcon = android.R.drawable.star_on
-}
-```
-
-`Java`
-```java
-import com.thunderhead.One;
-import com.thunderhead.android.api.messaging.OneMessagingConfiguration;
-
-final OneMessagingConfiguration oneMessagingConfiguration = new OneMessagingConfiguration.Builder()
-    .nonAdaptiveSmallIcon(android.R.drawable.star_on)
-    .enabled(true)
-    .build();
-
-One.setMessagingConfiguration(oneMessagingConfiguration);
-```
-
-### Get a push token
-
-To get the push token codelessly retrieved by the SDK, call the `One.getMessagingToken` Java method as shown below:
-
-```java  
-String pushToken = One.getMessagingToken();
-// work with the push token
-```
-*Note:*
-- This can be useful for testing and debugging, or to retrieve the token and pass it to another push notification provider. 
-
-### Send a push token
-
-To send a push token, call the `One.setMessagingToken` method by passing a push token, as shown below:
-
-```java
-import com.thunderhead.One;
-
-One.setMessagingToken("DUI03F379S1UUIDA6DADF8DFQPZ");
-```
 
 ### Send a location object
 
@@ -1606,36 +1694,218 @@ One.getTid();
 - Returns the `tid` assigned to the current user as a `String`.
 - Retrieving the current `tid` can be useful if you want to monitor the current user in Thunderhead ONE or Salesforce Interaction Studio, or if you need to pass the identity of the current user to another system that sends data to Thunderhead ONE or Salesforce Interaction Studio.
 
-### Access debug information
+### Configuring Logging
 
-The Thunderhead SDK for Android provides 4 distinct debugging levels that can be enabled after the SDK has been initialized, as shown below:
+The Thunderhead SDK for Android provides an extensible logging configuration API for debug or reporting purposes. The API can be configured to 
+log any combination of Components (features or technical concepts such as Networking or Databases) to Log Levels (Verbose, Debug, etc). In addition,
+custom log writers can be added to facilitate reporting if desired (ex. sending errors to Google Console).
 
-1. `NONE` - if set, no messages will be displayed in the console.
-  
-```java
-One.setLogLevel(OneLogLevel.NONE);
+By default, the Thunderhead SDK for Android logs ERROR and WARN messages for ANY component. Below are examples of other logging configurations.
+
+#### Turn all logs on
+
+*Example of configuring logging to VERBOSE Log Level for ANY Components of the Thunderhead SDK.*
+
+`Kotlin`
+```kotlin
+import com.thunderhead.android.api.logging.Component
+import com.thunderhead.android.api.logging.LogLevel
+import com.thunderhead.android.api.oneConfigureLogging
+// rest of imports
+
+oneConfigureLogging {
+    levels = mutableSetOf(LogLevel.VERBOSE) 
+    components = mutableSetOf(LogLevel.ANY)
+}
 ```
 
-2. `ALL` - if set, all log messages will be displayed in the console.
-  
+`Java`
 ```java
-One.setLogLevel(OneLogLevel.ALL);
+import com.thunderhead.android.api.logging.Component;
+import com.thunderhead.android.api.logging.LogLevel;
+import com.thunderhead.android.api.logging.OneLoggingConfiguration;
+// rest of imports
+
+final OneLoggingConfiguration oneLoggingConfiguration = OneLoggingConfiguration.builder()
+    .log(LogLevel.VERBOSE)
+    .log(Component.ANY)
+    .build();
+
+One.setLoggingConfiguration(oneLoggingConfiguration);
 ```
 
-3. `WEB_SERVICE` - if set, only web service logs will be displayed in the console.
+#### Turn specific logs on
 
-```java
-One.setLogLevel(OneLogLevel.WEB_SERVICE);
+*Example of configuring logging to combination of ERROR and WARN levels for just NETWORKING and DATABASE Components of the Thunderhead SDK.*
+
+`Kotlin`
+```kotlin
+import com.thunderhead.android.api.logging.Component
+import com.thunderhead.android.api.logging.LogLevel
+import com.thunderhead.android.api.logging.and
+import com.thunderhead.android.api.oneConfigureLogging
+// rest of imports
+
+oneConfigureLogging {
+    levels = LogLevel.ERROR and LogLevel.WARN
+    components = Component.NETWORKING and Component.DATABASE
+}
 ```
 
-4. `FRAMEWORK` - if set, only framework logs will be displayed in the console.
-  
+`Java`
 ```java
-One.setLogLevel(OneLogLevel.FRAMEWORK);
+import com.thunderhead.android.api.logging.Component;
+import com.thunderhead.android.api.logging.LogLevel;
+import com.thunderhead.android.api.logging.OneLoggingConfiguration;
+// rest of imports
+
+final OneLoggingConfiguration oneLoggingConfiguration = OneLoggingConfiguration.builder()
+    .log(LogLevel.ERROR)
+    .log(LogLevel.WARN)
+    .log(Component.NETWORKING)
+    .log(Component.DATABASE)
+    .build();
+
+One.setLoggingConfiguration(oneLoggingConfiguration);
 ```
+
+*Example of using a custom logger*
+
+`Kotlin`
+```kotlin
+import com.thunderhead.android.api.logging.Component
+import com.thunderhead.android.api.logging.LogLevel
+import com.thunderhead.android.api.logging.and
+import com.thunderhead.android.api.oneConfigureLogging
+import com.thunderhead.android.api.logging.LogWriter
+// rest of imports
+
+oneConfigureLogging {
+    levels = mutableSetOf(LogLevel.VERBOSE) 
+    components = Component.NETWORKING and Component.DATABASE
+    logWriters = mutableSetOf(CustomLogger())
+}
+
+// custom logger
+class CustomLogger : LogWriter() {
+    override fun log(
+        logLevel: LogLevel,
+        component: Component,
+        message: String,
+        throwable: Throwable?
+    ) {
+        Log.d("CustomLogger", "Component: ${component.name}\nMessage: $message", throwable)
+    }
+}
+```
+
+`Java`
+```java
+import com.thunderhead.android.api.logging.Component;
+import com.thunderhead.android.api.logging.LogLevel;
+import com.thunderhead.android.api.logging.OneLoggingConfiguration;
+import com.thunderhead.android.api.logging.LogWriter;
+// rest of imports
+
+final OneLoggingConfiguration oneLoggingConfiguration = OneLoggingConfiguration.builder()
+    .log(LogLevel.VERBOSE)
+    .log(Component.NETWORKING)
+    .log(Component.DATABASE)
+    .logTo(new CustomLogger())
+    .build();
+
+One.setLoggingConfiguration(oneLoggingConfiguration);
+
+// custom logger
+static class CustomLogger extends LogWriter {
+        @Override
+        public void log(
+                @NotNull LogLevel logLevel,
+                @NotNull Component component,
+                @NotNull String message,
+                @Nullable Throwable throwable
+        ) {
+            Log.d("CustomLogger", "Component: " + component.name() + "\nMessage: "  + message, throwable);
+        }
+    }
+```
+
+#### Turn logs for the Thunderhead SDK initialization process on
+
+The Thunderhead SDK performs initialization processes in an Android Content Provider which is instantiated before
+the Application is created. This means the log configuration API cannot be invoked before the Thunderhead SDK
+has finished its initialization process. To turn on logging for the initialization process of the Thunderhead SDK
+a meta data element must be added to the android manifest. If the metadata element is not set no logging is configured.
+
+*Metadata Info:*
+
+`name` :  `com.thunderhead.android.InitLogLevel`
+`value`: Comma separated list of `com.thunderhead.android.api.logging.LogLevel`
+
+*Example for logging VERBOSE and above logs:*
+
+```xml
+<application>
+    <!--Other application elements-->
+
+    <meta-data
+        android:name="com.thunderhead.android.InitLogLevel"
+        android:value="VERBOSE" />
+</application>
+```
+
+#### Turn all logs off
+
+*Example of turning logging off*
+
+`Kotlin`
+```kotlin
+import com.thunderhead.android.api.logging.Component
+import com.thunderhead.android.api.logging.LogLevel
+import com.thunderhead.android.api.logging.and
+import com.thunderhead.android.api.oneConfigureLogging
+// rest of imports
+
+oneConfigureLogging {
+    levels = mutableSetOf()
+    components = mutableSetOf()
+}
+```
+
+`Java`
+```java
+import com.thunderhead.android.api.logging.Component;
+import com.thunderhead.android.api.logging.LogLevel;
+import com.thunderhead.android.api.logging.OneLoggingConfiguration;
+// rest of imports
+
+final OneLoggingConfiguration oneLoggingConfiguration = OneLoggingConfiguration.builder()
+    .build();
+
+One.setLoggingConfiguration(oneLoggingConfiguration);
+```
+
+**Recommendation**
+We recommend including the above metadata only in `DEBUG` builds to ensure no unnecessary logging
+occurs in release. Therefore, only include this metadata in the `DEBUG` variant
+`AndroidManifest.xml` and _NOT_ in the main `AndroidManifest.xml`. To learn more about how manifests
+are merged, please see the [Android Documentation](https://developer.android.com/studio/build/manifest-merge).
 
 *Note:* 
-- By default, the Thunderhead SDK for Android does not display any debug log messages. However, exception messages are printed in the console, when these occur.
+- The `com.thunderhead.android.InitLogLevel` `AndroidManifest.xml` metadata value is only honored 
+for the Thunderhead SDK initialization process. After initialization has finished, the logging 
+configuration reverts to a default configuration mentioned above. If more logging is desired then use the logging
+configuration APIs to turn on logging as shown above.
+- When setting a single `LogLevel`, the SDK will log any messages of that level and above.
+    - The order from the bottom is: VERBOSE, DEBUG, ERROR, WARN, INFO, ASSERT
+    - Example: Setting VERBOSE will log all messages.
+    - Example: Setting INFO will log only INFO and ASSERT messages.
+- When setting multiple `LogLevel`(s), the SDK will log only messages of those specific levels.
+    - Example: Setting ERROR and WARN will only log message of ERROR and WARN levels and nothing else.
+- When setting `Component` to _only_ `ANY` all components will be logged in conjunction with the log level.
+- When setting multiple `Component`(s), the SDK will log only messages for those specific components.
+    - Do not set set multiple `Components`(s) along side the `ANY` component. Choose only the components
+        required or just use `ANY` but not both.
 
 ### Identify the SDK version
 
@@ -1666,7 +1936,7 @@ To completely remove the codeless identity transfer functionality for Android, m
 1. Open the **top-level** `build.gradle` file and remove the following dependency reference.
 
 ```gradle 
-classpath 'com.thunderhead.android:orchestration-plugin:2.0.0'
+classpath 'com.thunderhead.android:orchestration-plugin:4.0.0'
 ```
 
 2. Open the **app-level** `build.gradle` file and remove the following references.
@@ -1685,3 +1955,4 @@ _For Salesforce Marketing Cloud Interaction Studio questions, please submit a su
 
 ### Thunderhead ONE support
 _The Thunderhead team is available 24/7 to answer any questions you have. Just email onesupport@thunderhead.com or visit our docs page for more detailed installation and usage information._
+
