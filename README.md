@@ -1854,6 +1854,12 @@ a meta data element must be added to the android manifest. If the metadata eleme
 </application>
 ```
 
+**Recommendation**
+We recommend including the above metadata only in `DEBUG` builds to ensure no unnecessary logging
+occurs in release. Therefore, only include this metadata in the `DEBUG` variant
+`AndroidManifest.xml` and _NOT_ in the main `AndroidManifest.xml`. To learn more about how manifests
+are merged, please see the [Android Documentation](https://developer.android.com/studio/build/manifest-merge).
+
 #### Turn all logs off
 
 *Example of turning logging off*
@@ -1884,12 +1890,6 @@ final OneLoggingConfiguration oneLoggingConfiguration = OneLoggingConfiguration.
 
 One.setLoggingConfiguration(oneLoggingConfiguration);
 ```
-
-**Recommendation**
-We recommend including the above metadata only in `DEBUG` builds to ensure no unnecessary logging
-occurs in release. Therefore, only include this metadata in the `DEBUG` variant
-`AndroidManifest.xml` and _NOT_ in the main `AndroidManifest.xml`. To learn more about how manifests
-are merged, please see the [Android Documentation](https://developer.android.com/studio/build/manifest-merge).
 
 *Note:* 
 - The `com.thunderhead.android.InitLogLevel` `AndroidManifest.xml` metadata value is only honored 
