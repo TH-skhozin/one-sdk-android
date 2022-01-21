@@ -7,29 +7,29 @@
 
 ## Table of Contents
 
-* [Requirements](#requirements)
-* [Installation](#installation)
-* [Configure the codeless Thunderhead SDK for Android](#configure-the-codeless-thunderhead-sdk-for-android)
+* [Prerequisites](#prerequisites)
+* [Step 1: Add the Thunderhead SDK to your app](#step-1-add-the-thunderhead-sdk-to-your-app)
+* [Step 2: Configure the codeless Thunderhead SDK for Android](#step-2-configure-the-codeless-thunderhead-sdk-for-android)
     * [Set up the SDK in User mode for Play Store builds](#set-up-the-sdk-in-user-mode-for-play-store-builds)
     * [Set up the SDK in Admin mode for internal distribution](#set-up-the-sdk-in-admin-mode-for-internal-distribution)
-    * [Further codeless integration considerations](#further-codeless-integration-considerations)
-        * [Sending codeless Interactions based on the list of Interactions created under a Touchpoint](#sending-codeless-interactions-based-on-the-list-of-interactions-created-under-a-touchpoint)
-        * [Thunderhead Application Manifest file permissions](#thunderhead-application-manifest-file-permissions)
-        * [Configure and reconfigure the SDK](#configure-and-reconfigure-the-sdk)
-        * [SDK initialization not required](#sdk-initialization-not-required)
-* [Additional features of the Thunderhead SDK](#additional-features)
+* [Additional codeless integration considerations](#additional-codeless-integration-considerations)
+    * [Sending codeless Interactions based on the list of Interactions created under a Touchpoint](#sending-codeless-interactions-based-on-the-list-of-interactions-created-under-a-touchpoint)
+    * [Thunderhead Application Manifest file permissions](#thunderhead-application-manifest-file-permissions)
+    * [Configure and reconfigure the SDK](#configure-and-reconfigure-the-sdk)
+    * [SDK initialization not required](#sdk-initialization-not-required)
+* [Additional features of the Thunderhead SDK](ADDITIONAL-FEATURES.md)
 * [Troubleshooting guide](#troubleshooting-guide)
 * [Questions or need help](#questions-or-need-help)
     * [Salesforce Interaction Studio support](#salesforce-interaction-studio-support)
     * [Thunderhead ONE support](#thunderhead-one-support)
 
-## Requirements
+## Prerequisites
 
 + [Android Gradle Plugin](https://developer.android.com/studio/releases/gradle-plugin) 3.6.x
 + Android 5.0+ (API 21) and above
 + [Gradle](https://gradle.org/releases/) 5.6.4
 
-## Installation
+## Step 1: Add the Thunderhead SDK to your app
 
 1. Open your existing Android application in Android Studio.
 2. Include the Thunderhead SDK as a dependency in your project:
@@ -245,7 +245,7 @@ repositories {
 
 For further documentation on the `orchestration-plugin` please see the [Orchestration Plugin Readme](https://github.com/thunderheadone/one-android-orchestration-plugin/blob/master/README.md).
 
-## Configure the codeless Thunderhead SDK for Android
+## Step 2: Configure the codeless Thunderhead SDK for Android
 
 Enable your app to automatically recognize **Interactions** in your app, by executing the following steps:
 
@@ -338,7 +338,7 @@ To use the SDK in Admin mode, change the `mode` parameter to `OneMode.ADMIN`.
 
 **You have now successfully integrated the codeless Thunderhead SDK for Android.**
 
-### Further codeless integration considerations
+### Additional codeless integration considerations
 
 #### Sending codeless Interactions based on the list of Interactions created under a Touchpoint
 
