@@ -1,6 +1,6 @@
 # Additional features of the Thunderhead SDK
 
-##Table of Contents
+## Table of Contents
 
 * [Opt an end-user out of tracking](#opt-an-end-user-out-of-tracking)
 * [Opt an end user out of city country level tracking](#opt-an-end-user-out-of-city-country-level-tracking)
