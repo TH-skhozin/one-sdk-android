@@ -2,11 +2,16 @@
 
 ## Table of Contents
 
-* [Opt an end-user out of tracking](#opt-an-end-user-out-of-tracking)
-* [Opt an end user out of city country level tracking](#opt-an-end-user-out-of-city-country-level-tracking)
+* [Opt an end-user out of or into tracking](#opt-an-end-user-out-of-or-into-tracking)
+  * [Opt an end-user out/in of all tracking](#opt-an-end-user-outin-of-all-tracking)
+    * [Opt an end-user out of all tracking](#opt-an-end-user-out-of-all-tracking)
+    * [Opt an end-user in for all tracking](#opt-an-end-user-in-for-all-tracking)
+  * [Opt an end-user out/in of city/country level tracking](#opt-an-end-user-outin-of-citycountry-level-tracking)
+    * [Opt an end-user out of city/country level tracking](#opt-an-end-user-out-of-citycountry-level-tracking)
+    * [Opt an end-user in to city/country level tracking](#opt-an-end-user-in-to-citycountry-level-tracking)
 * [Exclude an Interaction](#exclude-an-interaction) 
 * [How to disable the codeless identity transfer support](#how-to-disable-the-codeless-identity-transfer-support)
-* [Disable automatic Interaction detection](#disable-automatic-interaction-detection)
+* [Disable automatic Interactionxa detection](#disable-automatic-interaction-detection)
 * [Programmatic Interactions and Properties API](#programmatic-interactions-and-properties-api)
     * [Send Interactions](#send-interactions)
         * [Send an Interaction request](#send-an-interaction-request)
@@ -41,9 +46,18 @@
 
 
 
-### Opt an end-user out of tracking
+### Opt an end-user out of or into tracking
+The following methods allow you to opt a user out of various levels of tracking and also opt them back in based on your app's privacy configuration.
 
-To opt an end-user out of tracking, when the end-user does not give permission to be tracked in the client app, call the `oneConfigureOptOut` top-level Kotlin function or the `One.setOptOutConfiguration` Java method as shown below:
+_Note_:
+ * By default all `optOut` options are set to `optOut = false`
+
+
+#### Opt an end-user out/in of all tracking
+Use this option to opt an end-user out or in of all tracking
+
+##### Opt an end-user out of all tracking
+To opt an end-user out of all tracking, when the end-user does not give permission to be tracked in the client app, call the `oneConfigureOptOut` top-level Kotlin function or the `One.setOptOutConfiguration` Java method as shown below:
 
 `Kotlin`
 ```kotlin
@@ -68,25 +82,17 @@ One.setOptOutConfiguration(optOutConfiguration);
 
 *Note:*
 - When a user is opted out, tracking stops and locally queued data is removed.
-- You can opt a user back in, at any point, by setting the `optOut` parameter to `false` using the same method.
 - For instructions on completely removing a user's data from Thunderhead ONE or Salesforce Interaction Studio, see our [API Documentation](https://thunderheadone.github.io/one-api/#operation/delete).
 
-### Opt an end user out of city country level tracking
-
-Use this option to opt an end-user out or in of all city/country level tracking.
-
-Examples of how to opt in to city/country level tracking
+##### Opt an end-user in for all tracking
+To opt an end-user back in to all tracking, call the `oneConfigureOptOut` top-level Kotlin function or the `One.setOptOutConfiguration` Java method as shown below:
 
 `Kotlin`
 ```kotlin
 import com.thunderhead.mobile.oneConfigureOptOut
-import com.thunderhead.mobile.optout.OneOptInOptions
 
-val options = EnumSet.noneOf(OneOptInOptions::class.java)
-options.add(OneOptInOptions.CITY_COUNTRY_DETECTION)
 oneConfigureOptOut {
     optOut = false
-    optInOptions = options
 }
 ```
 
@@ -94,18 +100,19 @@ oneConfigureOptOut {
 ```java
 import com.thunderhead.mobile.One;
 import com.thunderhead.mobile.optout.OneOptOutConfiguration;
-import com.thunderhead.mobile.optout.OneOptInOptions;
 
-Set<OneOptInOptions> options = EnumSet.noneOf(OneOptInOptions.class);
-options.add(OneOptInOptions.CITY_COUNTRY_DETECTION);
 final OneOptOutConfiguration optOutConfiguration = new OneOptOutConfiguration.Builder()
             .optOut(false)
-            .optInOptions(options)
             .build();
 
 One.setOptOutConfiguration(optOutConfiguration);
 ```
 
+#### Opt an end-user out/in of city/country level tracking
+
+Use the following options to opt an end-user out or in of all city/country level tracking.
+
+##### Opt an end-user out of city/country level tracking
 Examples of how to opt out of city/country level tracking
 
 `Kotlin`
@@ -138,6 +145,38 @@ One.setOptOutConfiguration(optOutConfiguration);
 *Note:*
 - By default a user is opted in and would need to be specifically opted out using the method mentioned above, depending on your specific privacy requirements.
 - When a user is opted out, all opt in options are ignored.
+
+##### Opt an end-user in to city/country level tracking
+Examples of how to opt in to city/country level tracking
+
+`Kotlin`
+```kotlin
+import com.thunderhead.mobile.oneConfigureOptOut
+import com.thunderhead.mobile.optout.OneOptInOptions
+
+val options = EnumSet.noneOf(OneOptInOptions::class.java)
+options.add(OneOptInOptions.CITY_COUNTRY_DETECTION)
+oneConfigureOptOut {
+    optOut = false
+    optInOptions = options
+}
+```
+
+`Java`
+```java
+import com.thunderhead.mobile.One;
+import com.thunderhead.mobile.optout.OneOptOutConfiguration;
+import com.thunderhead.mobile.optout.OneOptInOptions;
+
+Set<OneOptInOptions> options = EnumSet.noneOf(OneOptInOptions.class);
+options.add(OneOptInOptions.CITY_COUNTRY_DETECTION);
+final OneOptOutConfiguration optOutConfiguration = new OneOptOutConfiguration.Builder()
+            .optOut(false)
+            .optInOptions(options)
+            .build();
+
+One.setOptOutConfiguration(optOutConfiguration);
+```
 
 ### Exclude an Interaction
 
