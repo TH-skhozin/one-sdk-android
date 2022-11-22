@@ -1,5 +1,4 @@
 ![Thunderhead SDK](https://i.imgur.com/gfizURy.png "Thunderhead")
-![MXO_White](https://user-images.githubusercontent.com/75626649/203410680-34b2259c-5cfd-441d-8a6d-048430bcb0d3.png)
 ![MXO_RGB](https://user-images.githubusercontent.com/75626649/203410707-f1b622ed-fc25-459a-84e4-cb7d847e4a7d.png)
 
 ## Resources
