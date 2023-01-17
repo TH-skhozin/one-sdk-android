@@ -10,5 +10,5 @@ For additional features of the Medallia Experience Orchestration SDK for iOS, pl
 Having troubles with the Medallia Experience Orchestration SDK for iOS? Visit our [troubleshooting guide](https://medallia-uat.portal.heretto.com/en/medallia-experience-orchestration/medallia-experience-orchestration-for-ios/troubleshooting-guide).
 
 ## Questions or need help
-For Medallia Experience Orchestration questions, please submit a support ticket via https://support.thunderhead.com
+For Medallia Experience Orchestration questions, please submit a support ticket via https://support.thunderhead.com.
 
