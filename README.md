@@ -1,4 +1,5 @@
 <img src="https://user-images.githubusercontent.com/75626649/203578506-ade030aa-22d1-406d-9e66-16747259fb1c.png" width="450">
+
 ![logo](https://user-images.githubusercontent.com/75626649/203578506-ade030aa-22d1-406d-9e66-16747259fb1c.png)
 
 ## Medallia Experience Orchestration SDK for iOS
