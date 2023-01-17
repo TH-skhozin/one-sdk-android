@@ -3,7 +3,7 @@
 ## Medallia Experience Orchestration SDK for iOS
 To get started with the Medallia Experience Orchestration SDK for iOS, please follow our [online documentation](https://medallia-uat.portal.heretto.com/en/medallia-experience-orchestration/medallia-experience-orchestration-for-ios/getting-started-with-the-medallia-experience-orchestration-sdk-for-ios).
 
-## Additional Features of the Medallia Experience Orchestration SDK for iOS
+## Additional features of the Medallia Experience Orchestration SDK for iOS
 For additional features of the Medallia Experience Orchestration SDK for iOS, please follow our [online documentation](https://medallia-uat.portal.heretto.com/en/medallia-experience-orchestration/medallia-experience-orchestration-for-ios/additional-features-of-medallia-experience-orchestration-sdk-for-ios).
 
 ## Troubleshooting guide
