@@ -1,4 +1,4 @@
-<img src="https://user-images.githubusercontent.com/75626649/203578506-ade030aa-22d1-406d-9e66-16747259fb1c.png" width="200">
+<img src="https://user-images.githubusercontent.com/75626649/203578506-ade030aa-22d1-406d-9e66-16747259fb1c.png" width="400">
 
 ## Medallia Experience Orchestration SDK for iOS
 To get started with the Medallia Experience Orchestration SDK for iOS, please follow our [online documentation](https://medallia-uat.portal.heretto.com/en/medallia-experience-orchestration/medallia-experience-orchestration-for-ios/getting-started-with-the-medallia-experience-orchestration-sdk-for-ios).
